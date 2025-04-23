@@ -1,0 +1,55 @@
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# Create a new target
+data['Next_Close'] = data['Close'].shift(-1)
+data['Target_Movement'] = np.where(data['Next_Close'] > data['Close'], 1, 0)
+data = data.dropna()
+
+# Features and Target
+X_class = data[['Open', 'High', 'Low', 'Volume']]
+y_class = data['Target_Movement']
+
+# Split
+Xc_train, Xc_test, yc_train, yc_test = train_test_split(X_class, y_class, test_size=0.2, random_state=42)
+
+# Feature Scaling
+scaler = StandardScaler()
+Xc_train_scaled = scaler.fit_transform(Xc_train)
+Xc_test_scaled = scaler.transform(Xc_test)
+
+# Model
+log_reg_model = LogisticRegression(max_iter=1000)
+log_reg_model.fit(Xc_train_scaled, yc_train)
+
+# Predict
+yc_pred = log_reg_model.predict(Xc_test_scaled)
+
+# Evaluation
+accuracy = accuracy_score(yc_test, yc_pred)
+cm = confusion_matrix(yc_test, yc_pred)
+
+print("\n========= Logistic Regression Results =========")
+print(f"Accuracy: {accuracy*100:.2f}%")
+print("\nConfusion Matrix:")
+print(cm)
+
+# Show classification report
+print("\nClassification Report:")
+print(classification_report(yc_test, yc_pred, zero_division=0))
+
+# Plot confusion matrix nicely
+import seaborn as sns
+
+plt.figure(figsize=(6,4))
+sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
+
+
+
+
+
